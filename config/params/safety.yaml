@@ -1,0 +1,9 @@
+safety_watchdog:
+  ros__parameters:
+    battery_threshold_critical: 10.5
+    battery_threshold_warning: 11.0
+    cmd_vel_timeout_ms: 200
+    heartbeat_timeout_ms: 500
+    sensor_loss_timeout_s: 5.0
+    cpu_temp_threshold: 80.0
+    watchdog_device: "/dev/watchdog"

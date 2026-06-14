@@ -1,0 +1,7 @@
+geometry_msgs/PoseStamped start
+geometry_msgs/PoseStamped goal
+string map_frame
+---
+nav_msgs/Path path
+bool success
+string message

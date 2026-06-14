@@ -1,0 +1,30 @@
+motor_driver:
+  ros__parameters:
+    pwm_pin: 12
+    dir_pin: 13
+    encoder_pin_a: 17
+    encoder_pin_b: 27
+    encoder_ppr: 48
+    wheel_radius: 0.032
+    wheel_base: 0.178
+    max_pwm: 255
+    pwm_frequency: 100
+    gear_ratio: 1.0
+
+velocity_controller:
+  ros__parameters:
+    kp: 1.2
+    ki: 0.3
+    kd: 0.05
+    max_linear_speed: 0.5
+    max_linear_accel: 0.3
+    control_rate: 50.0
+
+steering_controller:
+  ros__parameters:
+    kp: 2.0
+    ki: 0.1
+    kd: 0.02
+    max_angular_speed: 1.5
+    max_angular_accel: 0.8
+    control_rate: 50.0

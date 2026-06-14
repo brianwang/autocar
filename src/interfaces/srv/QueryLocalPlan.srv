@@ -1,0 +1,8 @@
+sensor_msgs/LaserScan scan
+geometry_msgs/Twist current_velocity
+nav_msgs/Path global_path
+---
+nav_msgs/Path local_path
+geometry_msgs/Twist cmd_vel
+bool success
+string message
