@@ -3,10 +3,9 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
-    Command,
     FindExecutable,
     LaunchConfiguration,
     PathJoinSubstitution,
@@ -19,7 +18,10 @@ def generate_launch_description():
     """Generate launch description for Autocar simulation."""
     # Launch configuration variables
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
-    world_file = LaunchConfiguration("world_file", default="")
+    default_world = PathJoinSubstitution([
+        FindPackageShare("autocar_simulation"), "worlds", "empty.world",
+    ])
+    world_file = LaunchConfiguration("world_file", default=default_world)
     headless = LaunchConfiguration("headless", default="false")
     rviz_config = LaunchConfiguration("rviz_config", default="")
     enable_bridge = LaunchConfiguration("enable_bridge", default="true")
@@ -33,7 +35,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "world_file",
-            default_value="",
+            default_value=default_world,
             description="Path to the SDF world file",
         ),
         DeclareLaunchArgument(
@@ -53,7 +55,7 @@ def generate_launch_description():
         ),
     ]
 
-    # Gazebo Ignition server
+    # Gazebo Ignition server (always runs)
     gz_server = ExecuteProcess(
         cmd=[
             FindExecutable(name="ign"),
@@ -62,11 +64,10 @@ def generate_launch_description():
             "-r",
             world_file,
         ],
-        condition=IfCondition(LaunchConfiguration("headless")),
         output="screen",
     )
 
-    # Gazebo Ignition GUI
+    # Gazebo Ignition GUI (only when not headless)
     gz_gui = ExecuteProcess(
         cmd=[
             FindExecutable(name="ign"),
@@ -75,7 +76,7 @@ def generate_launch_description():
             "-g",
             world_file,
         ],
-        condition=IfCondition(LaunchConfiguration("headless")),
+        condition=UnlessCondition(LaunchConfiguration("headless")),
         output="screen",
     )
 

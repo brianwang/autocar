@@ -1,4 +1,2 @@
-add_executable(test_simulation_bridge test_simulation_bridge.cpp ../src/simulation_bridge.cpp)
-ament_target_dependencies(test_simulation_bridge rclcpp geometry_msgs sensor_msgs std_msgs)
-target_link_libraries(test_simulation_bridge gtest gtest_main pthread)
 ament_add_gtest(test_simulation_bridge test_simulation_bridge.cpp ../src/simulation_bridge.cpp)
+ament_target_dependencies(test_simulation_bridge rclcpp geometry_msgs sensor_msgs std_msgs)
