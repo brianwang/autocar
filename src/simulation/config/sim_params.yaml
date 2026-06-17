@@ -1,0 +1,34 @@
+# Autocar Simulation Parameters
+
+simulation_bridge:
+  ros__parameters:
+    # Gazebo ignition topic bridge settings
+    bridge_name: "/simulation_bridge"
+    update_rate: 50.0
+
+    # Odometry simulation
+    odom_frame_id: "odom"
+    child_frame_id: "base_footprint"
+
+    # Sensor update rates (Hz)
+    lidar_rate: 10.0
+    imu_rate: 100.0
+    gps_rate: 5.0
+    camera_rate: 15.0
+
+    # Noise parameters for simulated sensors
+    odom_noise_linear: 0.05
+    odom_noise_angular: 0.02
+    imu_noise_gyro: 0.001
+    imu_noise_accel: 0.01
+    gps_noise_position: 0.5
+
+    # Initial pose
+    initial_x: 0.0
+    initial_y: 0.0
+    initial_z: 0.0
+    initial_yaw: 0.0
+
+    # Simulation world
+    world_name: "autocar_garage"
+    use_sim_time: true
