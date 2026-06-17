@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <world name="city_street">
+    <physics name="1ms" type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
+    <plugin
+      filename="libignition-gazebo-physics-system.so"
+      name="ignition::gazebo::systems::Physics">
+    </plugin>
+    <plugin
+      filename="libignition-gazebo-user-commands-system.so"
+      name="ignition::gazebo::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="libignition-gazebo-scene-broadcaster-system.so"
+      name="ignition::gazebo::systems::SceneBroadcaster">
+    </plugin>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane</uri>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
+
+    <!-- Buildings -->
+    <model name="building_1">
+      <static>true</static>
+      <pose>8.0 6.0 1.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>4.0 4.0 3.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>4.0 4.0 3.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.6 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="building_2">
+      <static>true</static>
+      <pose>-6.0 5.0 1.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>3.0 3.0 3.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>3.0 3.0 3.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.6 0.4 0.4 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="building_3">
+      <static>true</static>
+      <pose>5.0 -5.0 2.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>5.0 3.0 4.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>5.0 3.0 4.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.4 0.6 0.5 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="building_4">
+      <static>true</static>
+      <pose>-7.0 -4.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>2.0 2.0 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>2.0 2.0 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.3 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Curbs -->
+    <model name="curb_1">
+      <static>true</static>
+      <pose>0 2.5 0.1 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>20 0.1 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>20 0.1 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.3 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="curb_2">
+      <static>true</static>
+      <pose>0 -2.5 0.1 0 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry>
+            <box>
+              <size>20 0.1 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="v">
+          <geometry>
+            <box>
+              <size>20 0.1 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.3 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
