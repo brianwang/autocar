@@ -1,75 +1,115 @@
-"""Launch the complete Autocar system in simulation mode.
-
-Brings up:
-- Gazebo Ignition with the Autocar world and robot model
-- Simulation bridge for ROS-Gazebo communication
-- All perception, planning, control, and application nodes
-- RViz2 for visualization
-"""
-
+"""Launch full Autocar system with Gazebo simulation."""
 import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    """Generate launch description for full Autocar simulation."""
-    use_sim_time = LaunchConfiguration("use_sim_time", default="true")
-    headless = LaunchConfiguration("headless", default="false")
-    world_name = LaunchConfiguration("world_name", default="autocar_garage")
+    sim_pkg = 'autocar_simulation'
+    sim_dir = get_package_share_directory(sim_pkg)
 
-    declared_arguments = [
-        DeclareLaunchArgument(
-            "use_sim_time",
-            default_value="true",
-            description="Use simulation time",
-        ),
-        DeclareLaunchArgument(
-            "headless",
-            default_value="false",
-            description="Run Gazebo Ignition in headless mode",
-        ),
-        DeclareLaunchArgument(
-            "world_name",
-            default_value="autocar_garage",
-            description="World file name (without .sdf extension)",
-        ),
-    ]
+    # Arguments
+    world_arg = DeclareLaunchArgument(
+        'world', default_value='city_street',
+        description='World file name'
+    )
+    noise_arg = DeclareLaunchArgument(
+        'noise', default_value='true',
+        description='Enable sensor noise'
+    )
+
+    world_name = LaunchConfiguration('world')
+    noise_enabled = LaunchConfiguration('noise')
 
     # Include simulation bringup
-    sim_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution([
-                FindPackageShare("autocar_simulation"),
-                "launch",
-                "sim_bringup.launch.py",
-            ])
-        ),
+    bringup = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(sim_dir, 'launch', 'sim_bringup.launch.py')
+        ]),
         launch_arguments={
-            "use_sim_time": use_sim_time,
-            "headless": headless,
+            'world': world_name,
+            'noise': noise_enabled,
+            'headless': 'false',
         }.items(),
     )
 
-    # TODO: Include perception layer when implemented
-    # perception_launch = IncludeLaunchDescription(...)
+    # Control layer (in simulation mode, skip motor_driver and sensor drivers)
+    # These nodes connect to topics published by simulation_bridge
+    control_nodes = [
+        Node(
+            package='autocar_control', executable='velocity_controller',
+            name='velocity_controller',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_control', executable='steering_controller',
+            name='steering_controller',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_control', executable='safety_watchdog',
+            name='safety_watchdog',
+            parameters=[{'use_sim_time': True}],
+        ),
+    ]
 
-    # TODO: Include planning layer when implemented
-    # planning_launch = IncludeLaunchDescription(...)
+    # Perception layer (only EKF fusion + SLAM, no sensor drivers)
+    perception_nodes = [
+        Node(
+            package='autocar_perception', executable='localization_fusion',
+            name='localization_fusion',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_perception', executable='slam_node',
+            name='slam_node',
+            parameters=[{'use_sim_time': True}],
+        ),
+    ]
 
-    # TODO: Include control layer when implemented
-    # control_launch = IncludeLaunchDescription(...)
+    # Planning layer
+    planning_nodes = [
+        Node(
+            package='autocar_planning', executable='global_planner',
+            name='global_planner',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_planning', executable='local_planner',
+            name='local_planner',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_planning', executable='behavior_tree',
+            name='behavior_tree',
+            parameters=[{'use_sim_time': True}],
+        ),
+    ]
 
-    # TODO: Include application layer when implemented
-    # application_launch = IncludeLaunchDescription(...)
+    # Application layer
+    app_nodes = [
+        Node(
+            package='autocar_application', executable='state_machine',
+            name='state_machine',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='autocar_application', executable='web_dashboard',
+            name='web_dashboard',
+            parameters=[{'use_sim_time': True}],
+        ),
+    ]
 
-    return LaunchDescription(
-        declared_arguments
-        + [
-            sim_bringup,
-        ]
-    )
+    return LaunchDescription([
+        world_arg,
+        noise_arg,
+        bringup,
+        *control_nodes,
+        *perception_nodes,
+        *planning_nodes,
+        *app_nodes,
+    ])

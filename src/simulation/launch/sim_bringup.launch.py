@@ -1,115 +1,97 @@
-"""Launch the Gazebo Ignition simulation environment for Autocar."""
-
+"""Launch Gazebo Ignition with autocar_car robot model and simulation bridge."""
 import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (
-    FindExecutable,
-    LaunchConfiguration,
-    PathJoinSubstitution,
-)
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindPackageShare
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    """Generate launch description for Autocar simulation."""
-    # Launch configuration variables
-    use_sim_time = LaunchConfiguration("use_sim_time", default="true")
-    default_world = PathJoinSubstitution([
-        FindPackageShare("autocar_simulation"), "worlds", "empty.world",
-    ])
-    world_file = LaunchConfiguration("world_file", default=default_world)
-    headless = LaunchConfiguration("headless", default="false")
-    rviz_config = LaunchConfiguration("rviz_config", default="")
-    enable_bridge = LaunchConfiguration("enable_bridge", default="true")
+    sim_pkg = 'autocar_simulation'
+    sim_dir = get_package_share_directory(sim_pkg)
 
-    # Declare launch arguments
-    declared_arguments = [
-        DeclareLaunchArgument(
-            "use_sim_time",
-            default_value="true",
-            description="Use simulation time",
-        ),
-        DeclareLaunchArgument(
-            "world_file",
-            default_value=default_world,
-            description="Path to the SDF world file",
-        ),
-        DeclareLaunchArgument(
-            "headless",
-            default_value="false",
-            description="Run Gazebo Ignition in headless mode",
-        ),
-        DeclareLaunchArgument(
-            "rviz_config",
-            default_value="",
-            description="Path to RViz2 configuration file",
-        ),
-        DeclareLaunchArgument(
-            "enable_bridge",
-            default_value="true",
-            description="Enable ROS-Gazebo bridge",
-        ),
-    ]
+    # Arguments
+    world_arg = DeclareLaunchArgument(
+        'world', default_value='test_obstacle',
+        description='World file name (without .sdf extension)'
+    )
+    noise_arg = DeclareLaunchArgument(
+        'noise', default_value='true',
+        description='Enable sensor noise injection'
+    )
+    headless_arg = DeclareLaunchArgument(
+        'headless', default_value='false',
+        description='Run Gazebo without GUI'
+    )
 
-    # Gazebo Ignition server (always runs)
+    world_name = LaunchConfiguration('world')
+    noise_enabled = LaunchConfiguration('noise')
+    headless = LaunchConfiguration('headless')
+
+    # Build world file path from package share
+    world_file = PathJoinSubstitution([
+        FindPackageShare(sim_pkg), 'worlds',
+        LaunchConfiguration('world')
+    ]) + '.sdf'
+
+    # Start Gazebo server
     gz_server = ExecuteProcess(
-        cmd=[
-            FindExecutable(name="ign"),
-            "gazebo",
-            "-v", "4",
-            "-r",
-            world_file,
-        ],
-        output="screen",
+        cmd=['ign', 'gazebo', '-r', '-s', '--world-name', world_name, world_file],
+        output='screen',
+        additional_env={'IGN_GAZEBO_RESOURCE_PATH': os.path.join(sim_dir, 'models')},
+        condition=LaunchConfiguration('headless') == 'true',
     )
 
-    # Gazebo Ignition GUI (only when not headless)
+    # Start Gazebo with GUI (non-headless)
     gz_gui = ExecuteProcess(
+        cmd=['ign', 'gazebo', '-r', '--world-name', world_name, world_file],
+        output='screen',
+        additional_env={'IGN_GAZEBO_RESOURCE_PATH': os.path.join(sim_dir, 'models')},
+        condition=LaunchConfiguration('headless') == 'false',
+    )
+
+    # Spawn robot via ign service
+    robot_sdf = os.path.join(sim_dir, 'models', 'autocar_car', 'model.sdf')
+    spawn_robot = ExecuteProcess(
         cmd=[
-            FindExecutable(name="ign"),
-            "gazebo",
-            "-v", "4",
-            "-g",
-            world_file,
+            'ign', 'service', '-s',
+            '/world/{}/create'.format('test_obstacle'),
+            '--reqtype', 'ignition.msgs.EntityFactory',
+            '--reptype', 'ignition.msgs.Boolean',
+            '--timeout', '10',
+            '--req', 'sdf_filename: "{}"'.format(robot_sdf),
         ],
-        condition=UnlessCondition(LaunchConfiguration("headless")),
-        output="screen",
+        output='screen',
     )
 
-    # Simulation bridge node
-    simulation_bridge = Node(
-        package="autocar_simulation",
-        executable="simulation_bridge",
-        name="simulation_bridge",
-        output="screen",
-        parameters=[PathJoinSubstitution(
-            [FindPackageShare("autocar_simulation"), "config", "sim_params.yaml"]
-        )],
-        condition=IfCondition(enable_bridge),
+    # Start simulation bridge node
+    bridge_node = Node(
+        package='autocar_simulation',
+        executable='simulation_bridge',
+        name='simulation_bridge',
+        parameters=[{
+            'noise_enabled': noise_enabled,
+            'use_sim_time': True,
+        }],
+        output='screen',
     )
 
-    # RViz2
-    rviz2 = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=[
-            "-d", rviz_config,
-        ],
-        condition=IfCondition(LaunchConfiguration("rviz_config")),
+    # Static TF: map -> odom
+    tf_static_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_to_odom_static',
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
     )
 
-    return LaunchDescription(
-        declared_arguments
-        + [
-            gz_server,
-            gz_gui,
-            simulation_bridge,
-            rviz2,
-        ]
-    )
+    return LaunchDescription([
+        world_arg,
+        noise_arg,
+        headless_arg,
+        gz_server,
+        gz_gui,
+        spawn_robot,
+        bridge_node,
+        tf_static_node,
+    ])
