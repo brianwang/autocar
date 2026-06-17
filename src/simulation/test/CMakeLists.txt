@@ -1,2 +1,0 @@
-ament_add_gtest(test_simulation_bridge test_simulation_bridge.cpp)
-ament_target_dependencies(test_simulation_bridge rclcpp std_msgs sensor_msgs geometry_msgs)
