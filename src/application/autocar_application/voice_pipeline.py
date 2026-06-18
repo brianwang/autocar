@@ -5,14 +5,14 @@ from std_msgs.msg import String
 
 
 INTENT_RULES = [
+    ("多远", "QUERY"),
+    ("继续", "RESUME"),
     ("去", "NAVIGATE"),
     ("到", "NAVIGATE"),
+    ("回", "NAVIGATE"),
     ("停", "PAUSE"),
     ("走", "OVERRIDE_PLAN"),
     ("绕", "REPLAN"),
-    ("多远", "QUERY"),
-    ("继续", "RESUME"),
-    ("回", "NAVIGATE"),
 ]
 
 

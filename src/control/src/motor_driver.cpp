@@ -18,7 +18,7 @@ public:
     this->declare_parameter("gear_ratio", 1.0);
     this->declare_parameter("pwm_pin", 12);
     this->declare_parameter("dir_pin", 13);
-    this->declare_parameter("max_pwm", 255);
+    this->declare_parameter("max_pwm", 255.0);
 
     odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
     battery_pub_ = this->create_publisher<std_msgs::msg::Float32>("/battery_voltage", 10);
@@ -41,8 +41,8 @@ private:
     last_cmd_ = *msg;
     double left = msg->linear.x - msg->angular.z * wheel_base_ / 2.0;
     double right = msg->linear.x + msg->angular.z * wheel_base_ / 2.0;
-    target_left_speed_ = static_cast<int>(std::clamp(left / max_speed_ * max_pwm_, -max_pwm_, max_pwm_));
-    target_right_speed_ = static_cast<int>(std::clamp(right / max_speed_ * max_pwm_, -max_pwm_, max_pwm_));
+    target_left_speed_ = static_cast<int>(std::clamp(left / max_speed_ * max_pwm_, -static_cast<double>(max_pwm_), static_cast<double>(max_pwm_)));
+    target_right_speed_ = static_cast<int>(std::clamp(right / max_speed_ * max_pwm_, -static_cast<double>(max_pwm_), static_cast<double>(max_pwm_)));
   }
 
   void controlLoop() {
@@ -55,7 +55,6 @@ private:
   }
 
   void publishOdometry() {
-    double wheel_radius = this->get_parameter("wheel_radius").as_double();
     double wheel_base = this->get_parameter("wheel_base").as_double();
     double max_pwm = this->get_parameter("max_pwm").as_double();
 

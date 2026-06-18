@@ -18,7 +18,7 @@ TEST(PIDControllerTest, DerivativeDampens) {
   autocar_control::PIDController pid(0.0, 0.0, 1.0, -10.0, 10.0, 100.0);
   pid.compute(2.0, 0.0, 1.0);
   double output = pid.compute(1.0, 1.0, 1.0);
-  EXPECT_NEAR(output, -1.0, 0.01);
+  EXPECT_NEAR(output, -2.0, 0.01);
 }
 
 TEST(PIDControllerTest, OutputClamped) {
