@@ -18,6 +18,11 @@ find_package(Eigen3 REQUIRED)
 
 include_directories(include)
 
+# Kalman filter library (no main)
+add_library(autocar_perception_algo src/kalman_filter.cpp)
+target_include_directories(autocar_perception_algo PUBLIC include)
+ament_target_dependencies(autocar_perception_algo rclcpp Eigen3)
+
 set(EXECUTABLES
   gps_driver
   imu_driver
@@ -29,6 +34,7 @@ set(EXECUTABLES
 
 foreach(EXEC IN LISTS EXECUTABLES)
   add_executable(${EXEC} src/${EXEC}.cpp)
+  target_link_libraries(${EXEC} autocar_perception_algo)
   ament_target_dependencies(${EXEC}
     rclcpp sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs std_msgs Eigen3
   )
