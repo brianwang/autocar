@@ -24,6 +24,13 @@
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
     </include>
 
+    <!-- Autocar Robot -->
+    <include>
+      <pose>0 0 0.05 0 0 0</pose>
+      <name>autocar_car</name>
+      <uri>model://autocar_car</uri>
+    </include>
+
     <!-- Obstacles -->
     <model name="obstacle_1">
       <static>true</static>

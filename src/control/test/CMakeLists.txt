@@ -19,3 +19,8 @@ target_link_libraries(test_velocity_controller GTest::gtest GTest::gtest_main pt
 ament_add_gtest(test_safety_watchdog test_safety_watchdog.cpp)
 target_include_directories(test_safety_watchdog PRIVATE ../include)
 target_link_libraries(test_safety_watchdog GTest::gtest GTest::gtest_main pthread)
+
+# Chassis protocol test
+ament_add_gtest(test_chassis_protocol test_chassis_protocol.cpp ../src/chassis_protocol.cpp)
+target_include_directories(test_chassis_protocol PRIVATE ../include)
+target_link_libraries(test_chassis_protocol GTest::gtest GTest::gtest_main pthread)

@@ -1,15 +1,14 @@
 motor_driver:
   ros__parameters:
-    pwm_pin: 12
-    dir_pin: 13
-    encoder_pin_a: 17
-    encoder_pin_b: 27
-    encoder_ppr: 48
-    wheel_radius: 0.032
+    protocol: "serial"            # "serial" | "tcp"
+    serial_port: "/dev/ttyAMA0"
+    serial_baud: 115200
+    tcp_host: "127.0.0.1"
+    tcp_port: 9999
     wheel_base: 0.178
-    max_pwm: 255
-    pwm_frequency: 100
-    gear_ratio: 1.0
+    wheel_radius: 0.032
+    max_speed: 0.5
+    simulation: false
 
 velocity_controller:
   ros__parameters:
