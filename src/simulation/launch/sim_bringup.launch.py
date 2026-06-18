@@ -6,6 +6,7 @@ Usage:
   ros2 launch autocar_simulation sim_bringup.launch.py world:=test_obstacle headless:=true
 """
 import os
+import sys
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
@@ -50,31 +51,10 @@ def _spawn_robot(context, *args, **kwargs):
     sim_dir = get_package_share_directory('autocar_simulation')
     world_name = LaunchConfiguration('world').perform(context) or 'test_obstacle'
     robot_sdf = os.path.join(sim_dir, 'models', 'autocar_car', 'model.sdf')
-
-    # Remove any previous instance first (ignore failure)
-    remove_cmd = [
-        'ign', 'service', '-s', '/world/{}/remove'.format(world_name),
-        '--reqtype', 'ignition.msgs.Entity',
-        '--reptype', 'ignition.msgs.Boolean',
-        '--timeout', '3',
-        '--req', 'name: "autocar_car"',
-    ]
-    try:
-        import subprocess
-        subprocess.run(remove_cmd, capture_output=True, timeout=5)
-    except Exception:
-        pass
+    spawn_script = os.path.join(sim_dir, 'launch', 'spawn_robot.py')
 
     return [ExecuteProcess(
-        cmd=[
-            'ign', 'service', '-s', '/world/{}/create'.format(world_name),
-            '--reqtype', 'ignition.msgs.EntityFactory',
-            '--reptype', 'ignition.msgs.Boolean',
-            '--timeout', '10',
-            '--req',
-            'sdf_filename: "{}" name: "autocar_car" pose: {{position: {{x: 0 y: 0 z: 0.05}}}}'.format(
-                robot_sdf),
-        ],
+        cmd=[sys.executable, spawn_script, world_name, robot_sdf],
         output='screen',
     )]
 
@@ -98,29 +78,34 @@ def generate_launch_description():
         # Note: ros_ign_bridge shows deprecation warning, redirects to ros_gz_bridge
         # Direction:  [ = ign->ros   ] = ros->ign   <-> = bidirectional
 
-        # Sensor topics: Ignition -> ROS2
+        # Sensor topics: Ignition -> ROS2 (remapped to match ROS node expectations)
         Node(package='ros_ign_bridge', executable='parameter_bridge',
              name='bridge_scan',
              arguments=['/model/autocar_car/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan'],
-             parameters=[{'use_sim_time': True}]),
+             parameters=[{'use_sim_time': True}],
+             remappings=[('/model/autocar_car/scan', '/scan')]),
         Node(package='ros_ign_bridge', executable='parameter_bridge',
              name='bridge_imu',
              arguments=['/model/autocar_car/imu@sensor_msgs/msg/Imu[ignition.msgs.IMU'],
-             parameters=[{'use_sim_time': True}]),
+             parameters=[{'use_sim_time': True}],
+             remappings=[('/model/autocar_car/imu', '/imu')]),
         Node(package='ros_ign_bridge', executable='parameter_bridge',
              name='bridge_odom',
              arguments=['/model/autocar_car/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry'],
-             parameters=[{'use_sim_time': True}]),
+             parameters=[{'use_sim_time': True}],
+             remappings=[('/model/autocar_car/odom', '/odom')]),
         Node(package='ros_ign_bridge', executable='parameter_bridge',
              name='bridge_depth',
              arguments=['/model/autocar_car/depth_image@sensor_msgs/msg/Image[ignition.msgs.Image'],
-             parameters=[{'use_sim_time': True}]),
+             parameters=[{'use_sim_time': True}],
+             remappings=[('/model/autocar_car/depth_image', '/depth')]),
 
         # cmd_vel: ROS2 -> Ignition (planning/cmd_vel -> Gazebo DiffDrive)
         Node(package='ros_ign_bridge', executable='parameter_bridge',
              name='bridge_cmd_vel',
              arguments=['/model/autocar_car/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist'],
-             parameters=[{'use_sim_time': True}]),
+             parameters=[{'use_sim_time': True}],
+             remappings=[('/model/autocar_car/cmd_vel', '/cmd_vel')]),
 
         # Static TF: map -> odom
         Node(package='tf2_ros', executable='static_transform_publisher',
