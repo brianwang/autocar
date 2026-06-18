@@ -14,6 +14,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 include_directories(include)
 
@@ -29,7 +30,7 @@ set(EXECUTABLES
 foreach(EXEC IN LISTS EXECUTABLES)
   add_executable(${EXEC} src/${EXEC}.cpp)
   ament_target_dependencies(${EXEC}
-    rclcpp sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs std_msgs
+    rclcpp sensor_msgs geometry_msgs nav_msgs tf2 tf2_ros tf2_geometry_msgs std_msgs Eigen3
   )
   install(TARGETS ${EXEC}
     DESTINATION lib/${PROJECT_NAME})
