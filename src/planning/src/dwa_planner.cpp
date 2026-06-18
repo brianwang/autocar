@@ -83,7 +83,7 @@ double DWAPlanner::evaluateTrajectory(const Trajectory& traj,
          config_.speed_cost_weight * speedCost(traj);
 }
 
-double DWAPlanner::obstacleCost(const Trajectory& traj, const sensor_msgs::msg::LaserScan& scan) {
+double DWAPlanner::obstacleCost(const Trajectory& traj, const sensor_msgs::msg::LaserScan& /*scan*/) {
   double min_dist = std::numeric_limits<double>::max();
   for (const auto& pose : traj.poses) {
     double dist = std::hypot(pose.pose.position.x, pose.pose.position.y);

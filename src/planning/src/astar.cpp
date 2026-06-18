@@ -1,6 +1,7 @@
 #include "autocar_planning/astar.hpp"
 #include <queue>
 #include <unordered_map>
+#include <map>
 #include <cmath>
 #include <algorithm>
 
