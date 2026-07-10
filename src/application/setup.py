@@ -23,6 +23,7 @@ setup(
             'state_machine = autocar_application.state_machine:main',
             'voice_pipeline = autocar_application.voice_pipeline:main',
             'web_dashboard = autocar_application.web_dashboard:main',
+            'mqtt_command_bridge = autocar_application.mqtt_command_bridge:main',
         ],
     },
 )

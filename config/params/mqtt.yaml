@@ -1,0 +1,8 @@
+mqtt_command_bridge:
+  ros__parameters:
+    mqtt_host: "124.221.233.228"
+    mqtt_port: 1883
+    mqtt_user: "wyz"
+    mqtt_pass: "123456"
+    mqtt_topic: "test/topic"
+    mqtt_client_id: "autocar_bridge"

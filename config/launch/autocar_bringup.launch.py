@@ -103,4 +103,9 @@ def generate_launch_description():
             package='autocar_application', executable='web_dashboard',
             name='web_dashboard',
         ),
+        Node(
+            package='autocar_application', executable='mqtt_command_bridge',
+            name='mqtt_command_bridge',
+            parameters=[os.path.join(_config_dir, 'mqtt.yaml')],
+        ),
     ])

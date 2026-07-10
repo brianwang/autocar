@@ -71,7 +71,8 @@ cd src/application && python -m pytest test/ -v
 | `/odom` | Odometry | motor_driver → localization_fusion |
 | `/odom_fused` | Odometry | localization_fusion → behavior_tree |
 | `/scan` | LaserScan | lidar_driver → local_planner, slam_node |
-| `/voice_command` | String | voice_pipeline → behavior_tree, state_machine |
+| `/mqtt_cmd` | String (MQTT) | 远程控制台 → mqtt_command_bridge → `/cmd_vel` |
+| `/voice_command` | String | voice_pipeline, mqtt_command_bridge → behavior_tree, state_machine |
 | `/task_goal` | PoseStamped | state_machine → behavior_tree, global_planner |
 | `/safety_state` | String | safety_watchdog → state_machine |
 
